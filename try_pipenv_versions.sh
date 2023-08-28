@@ -2,10 +2,12 @@
 
 readonly PIPENV_VERSIONS=(
   2023.7.23
-  2023.8.19
-  2023.8.20
-  2023.8.21
-  2023.8.22
+  # Ignore known broken versions.
+  # 2023.8.19
+  # 2023.8.20
+  # 2023.8.21
+  # 2023.8.22
+  2023.8.26
 )
 
 install_test_and_uninstall_package() {
@@ -42,7 +44,7 @@ main() {
            install_test_and_uninstall_package \
              another_venv ../test-hello &&
            install_test_and_uninstall_package \
-             another_venv ./applications/test-hello ); then
+             another_venv ../applications/test-hello ); then
       echo "--- pipenv version ${version} is broken ---"
     else
       echo "--- pipenv version ${version} is working ---"
