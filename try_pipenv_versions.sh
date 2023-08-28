@@ -9,20 +9,22 @@ readonly PIPENV_VERSIONS=(
 )
 
 install_test_and_uninstall_package() {
-  path="${1}"
-  if ! pipenv run pipenv install -e "${path}"; then
+  local venv_path="${1}"
+  local package_path="${2}"
+  local error=0
+  pushd "${venv_path}"
+  if ! pipenv run pipenv install -e "${package_path}"; then
     echo "Installation of ${path} failed" >&2
-    return 1
-  fi
-  if ! pipenv run test-hello; then
+    error=1
+  elif ! pipenv run test-hello; then
     echo 'Execution of test-hello failed.' >&2
-    return 1
-  fi
-  if ! pipenv uninstall test-hello; then
+    error=1
+  elif ! pipenv uninstall test-hello; then
     echo 'Uninstallation of test-hello failed.'
-    return 1
+    error=1
   fi
-  return 0
+  popd
+  return $((error))
 }
 
 main() {
@@ -33,8 +35,14 @@ main() {
     git clean -dfx
     echo "=== Using pipenv version ${version} ==="
     pipenv sync
-    if ! ( install_test_and_uninstall_package ./test-hello &&
-             install_test_and_uninstall_package ./applications/test-hello ); then
+    if ! ( install_test_and_uninstall_package \
+             . ./test-hello &&
+           install_test_and_uninstall_package \
+             . ./applications/test-hello &&
+           install_test_and_uninstall_package \
+             another_venv ../test-hello &&
+           install_test_and_uninstall_package \
+             another_venv ./applications/test-hello ); then
       echo "--- pipenv version ${version} is broken ---"
     else
       echo "--- pipenv version ${version} is working ---"
