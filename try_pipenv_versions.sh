@@ -7,7 +7,8 @@ readonly PIPENV_VERSIONS=(
   # 2023.8.20
   # 2023.8.21
   # 2023.8.22
-  2023.8.26
+  # 2023.8.26
+  2023.8.28
 )
 
 install_test_and_uninstall_package() {
