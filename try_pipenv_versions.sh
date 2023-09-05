@@ -69,6 +69,9 @@ install_test_and_uninstall_package() {
     error=1
   elif ! check_pipfile "${package_path}"; then
     error=1
+  elif ! pipenv lock; then
+    echo 'Locking failed.' >&2
+    error=1
   elif ! pipenv run test-hello; then
     echo 'Execution of test-hello failed.' >&2
     error=1
