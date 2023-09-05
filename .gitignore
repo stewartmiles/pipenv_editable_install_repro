@@ -1,3 +1,4 @@
+.env
 Pipfile*
 another_venv/Pipfile*
 **.egg-info
