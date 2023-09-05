@@ -62,9 +62,13 @@ main() {
     pipx uninstall pipenv || true
     pipx install "pipenv==${version}"
     git clean -dfx
-    git checkout Pipfile{,.lock} another_venv/Pipfile{,.lock}
     echo "=== Using pipenv version ${version} ==="
-    pipenv sync
+    pipenv --python $(which python)
+    (
+      mkdir -p another_venv
+      cd another_venv
+      pipenv --python $(which python)
+    )
     if ! ( install_test_and_uninstall_package \
              . ./test-hello &&
            install_test_and_uninstall_package \

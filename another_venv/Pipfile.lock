@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "7f7606f08e0544d8d012ef4d097dabdd6df6843a28793eb6551245d4b2db4242"
+            "sha256": "08d8cd2781157cf3ebafbeba84526e1c8ed2450b91b614e70ea3e09e24c9ebaa"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -15,6 +15,11 @@
             }
         ]
     },
-    "default": {},
+    "default": {
+        "test-hello": {
+            "editable": true,
+            "file": "/home/stewart/src/pipenv_editable_install_repro/test-hello"
+        }
+    },
     "develop": {}
 }

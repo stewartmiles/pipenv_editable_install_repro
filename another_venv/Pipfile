@@ -4,6 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+test-hello = {file = "/home/stewart/src/pipenv_editable_install_repro/test-hello", editable = true}
 
 [dev-packages]
 

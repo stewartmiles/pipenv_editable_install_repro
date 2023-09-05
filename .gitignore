@@ -1,0 +1,3 @@
+Pipfile*
+another_venv/Pipfile*
+**.egg-info
