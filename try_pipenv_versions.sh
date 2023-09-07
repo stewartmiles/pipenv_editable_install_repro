@@ -1,5 +1,8 @@
 #!/bin/bash -xeu
 
+# Store the venv in the project directory so that it's easy to clean up.
+export PIPENV_VENV_IN_PROJECT=true
+
 readonly PIPENV_VERSIONS=(
   2023.7.23 # Works
   # Ignore known broken versions.
@@ -9,7 +12,8 @@ readonly PIPENV_VERSIONS=(
   # 2023.8.22
   # 2023.8.26
   # 2023.8.28
-  2023.9.1
+  # 2023.9.1
+  2023.9.7 # Works
 )
 
 # Written into .env before each set of executed tests.
@@ -50,7 +54,7 @@ check_pipfile() {
     if [[ -z "${found_relative_package_path}" &&
           -z "${found_alternative_package_path}" ]]; then
       echo "${relative_package_path} and ${alternative_package_path} " >&2
-      echo "not found in {filename}" >&2
+      echo "not found in ${filename}" >&2
       echo "--- ${filename} ---" >&2
       cat "${filename}" >&2
       error=1
@@ -67,10 +71,10 @@ install_test_and_uninstall_package() {
   if ! pipenv run pipenv install -e "${package_path}"; then
     echo "Installation of ${package_path} failed" >&2
     error=1
-  elif ! check_pipfile "${package_path}"; then
-    error=1
   elif ! pipenv lock; then
     echo 'Locking failed.' >&2
+    error=1
+  elif ! check_pipfile "${package_path}"; then
     error=1
   elif ! pipenv run test-hello; then
     echo 'Execution of test-hello failed.' >&2
@@ -96,24 +100,26 @@ make_venv() {
 }
 
 main() {
+  local version
+  local pipenv_version_works
   cd "$(dirname "$0")"
   for version in "${PIPENV_VERSIONS[@]}"; do
     pipx uninstall pipenv || true
     pipx install "pipenv==${version}"
     echo "=== Using pipenv version ${version} ==="
-
+    pipenv --version
+    pipenv_version_works=1
     for dotenv_contents in "${DOTENV[@]}"; do
-      git clean -dfx
-      echo -e "--- Using .env---\n${dotenv_contents}"
-
       local venv_directory
       local relative_root_directory
       for vars in 'venv_directory=.; relative_root_directory=.' \
                   'venv_directory=another_venv; relative_root_directory=..'; do
         eval "${vars}"
+        echo -e "--- Using .env---\n${dotenv_contents}"
         echo "--- Installing packages in ${venv_directory} ---"
         # NOTE: To nest these, venvs in subdirectories need to be created first
         # otherwise pipenv walks the parent tree and finds the wrong venv.
+        git clean -dfx
         make_venv "${venv_directory}" "${dotenv_contents}"
 
         # Test package installation.
@@ -124,12 +130,17 @@ main() {
                  "${venv_directory}" \
                  "${relative_root_directory}/applications/test-hello" ); then
           echo "--- pipenv version ${version} is broken ---"
+          pipenv_version_works=0
           break
-        else
-          echo "--- pipenv version ${version} is working ---"
         fi
       done
+      if [[ $((pipenv_version_works)) -eq 0 ]]; then
+        break
+      fi
     done
+    if [[ $((pipenv_version_works)) -eq 1 ]]; then
+      echo "--- pipenv version ${version} works ---"
+    fi
   done
 }
 
